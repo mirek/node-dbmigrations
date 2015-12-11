@@ -1,0 +1,38 @@
+{
+  "name": "dbmigrations",
+  "version": "0.0.1",
+  "description": "Database migrations.",
+  "main": "lib/index.js",
+  "repository": "https://github.com/mirek/node-dbmigrations.git",
+  "scripts": {
+    "prepublish": "rm -rf lib && babel src -d lib",
+    "test": "npm run prepublish && mocha --compilers js:babel-register spec/",
+    "babel": "babel",
+    "show-pack": "npm pack && tar -tf ring-buffer-*.tgz | sort && rm ring-buffer-*.tgz",
+    "lint": "eslint src/*"
+  },
+  "keywords": [
+    "db",
+    "migrations",
+    "migrate",
+    "postgres",
+    "schema"
+  ],
+  "author": "Mirek Rusin (http://github.com/mirek)",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^1.1.1",
+    "lodash": "^3.10.1",
+    "sequelize": "^3.14.2",
+    "sprintf": "^0.1.5"
+  },
+  "devDependencies": {
+    "babel": "^6.3.13",
+    "babel-cli": "^6.3.17",
+    "babel-eslint": "^5.0.0-beta4",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-stage-0": "^6.3.13",
+    "eslint": "^1.10.3",
+    "mocha": "^2.3.4"
+  }
+}
