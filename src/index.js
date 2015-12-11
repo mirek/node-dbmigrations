@@ -7,6 +7,7 @@ import _ from 'lodash';
 import assert from 'assert';
 import sprintf from 'sprintf';
 import chalk from 'chalk';
+import pgpass from './pgpass';
 
 /**
  * Represents single migration.
@@ -71,13 +72,14 @@ export class Migrations {
   }
 
   /**
-   * Reconnect to postgres database.
+   * Reconnect to postgres database. Well not really, just setup everything in sync for async prepare which
+   * does actual reconnection.
    * @param {String} url
    */
   reconnect(url) {
     this.disconnect();
     this.url = url;
-    this.db = new Sequelize(url, { logging: null });
+    this.db = null;
   }
 
   /**
@@ -85,6 +87,7 @@ export class Migrations {
    * @return {async Boolean}
    */
   async prepare() {
+    this.db = new Sequelize(await pgpass(this.url), { logging: null });
     await this.db.authenticate();
     await this.maybeInit();
   }
