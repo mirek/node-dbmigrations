@@ -8,6 +8,7 @@ import assert from 'assert';
 import sprintf from 'sprintf';
 import chalk from 'chalk';
 import pgpass from './pgpass';
+import { template } from './helpers';
 
 /**
  * Represents single migration.
@@ -156,16 +157,10 @@ export class Migrations {
     let content = null;
     if (sql) {
       fname = `${base}.sql`;
-      content = [
-        `-- INSERT INTO migrations(stamp) VALUES('${stamp}');`
-      ].join('\n');
+      content = template('sql.tmpl');
     } else {
       fname = `${base}.js`;
-      content = [
-        'export default async function (db) {',
-        '  await db.query(\'SELECT 1;\');',
-        '}'
-      ].join('\n');
+      content = template('js.tmpl');
     }
     let path = `${this.root}/${fname}`;
     fs.writeFileSync(path, content);

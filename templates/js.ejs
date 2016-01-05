@@ -1,0 +1,7 @@
+
+export default async function (db) {
+  await db.transaction(async (transaction) => {
+    await db.query('create table foo(id serial primary key);', { transaction });
+    await db.query('create table bar(id serial primary key);', { transaction });
+  });
+}
