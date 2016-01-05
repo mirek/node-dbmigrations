@@ -24,6 +24,7 @@
   "author": "Mirek Rusin (http://github.com/mirek)",
   "license": "MIT",
   "dependencies": {
+    "ajv": "^3.1.1",
     "babel-polyfill": "^6.3.14",
     "chalk": "^1.1.1",
     "commander": "^2.9.0",
