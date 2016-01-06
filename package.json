@@ -27,12 +27,15 @@
     "ajv": "^3.1.1",
     "babel-polyfill": "^6.3.14",
     "chalk": "^1.1.1",
-    "commander": "^2.9.0",
+    "debug": "^2.2.0",
     "ejs": "^2.3.4",
     "lodash": "^3.10.1",
+    "pg": "^4.4.3",
+    "pg-hstore": "^2.3.2",
     "pgpass": "0.0.3",
     "sequelize": "^3.16.0",
-    "sprintf": "^0.1.5"
+    "sprintf": "^0.1.5",
+    "yargs": "^3.31.0"
   },
   "devDependencies": {
     "babel-cli": "^6.3.17",

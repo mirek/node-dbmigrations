@@ -1,89 +1,154 @@
 /* eslint-env node */
-/* eslint-disable no-console */
+/* eslint-disable no-console, max-len */
 
-import { Command } from 'commander';
-import { Migrations } from './migrations';
-import chalk from 'colors';
-import pkg from '../package.json';
+import Debug from 'debug';
+import yargs from 'yargs';
+import { Migrations } from './index';
+import chalk from 'chalk';
+import _ from 'lodash';
+// import pkg from '../package.json';
+import * as helpers from './helpers';
+
+const debug = new Debug('dbmigrations');
+const dotfile = helpers.dotfile();
+const labels = '123456789abcdefghijklmnopqrstuvwxyz';
 
 /**
- * Action wrapper logging errors.
- * @param  {Function|Promise} func
+ * Given url or env returns a list of urls.
+ * @param {string} url
+ * @param {string} env
+ * @return {array[string]} List of urls
  */
-function wrapper(func) {
-  return function (...args) {
-    Promise.resolve(func(...args)).catch(err => console.error(chalk.red(err.stack)));
-  };
+function urlsWithUrlAndEnv(url, env) {
+  let r = [];
+  if (url) {
+    r.push(url);
+  }
+  if (env) {
+    const envUrls = _.get(dotfile, [ 'envs', env ]);
+    r.push(...envUrls);
+  }
+  return r;
 }
 
-const program = new Command('dbmigrations');
+async function create({ js, sql, name }) {
+  let migrations = new Migrations();
+  let migration = migrations.create({ name, sql: js !== true || sql === true });
+  if (migration) {
+    console.log(migration.coloredLine());
+  }
+}
 
-program
-  .version(pkg.version)
-  .usage('dbmigrations [command] [options]')
-  .description(pkg.description);
+async function check({ env, url }) {
+  const urls = urlsWithUrlAndEnv(url, env);
 
-program
-  .command('create [text]')
-  .description('Create migration file.')
-  .option('--js', 'Create JavaScript migration file instead of SQL one.')
-  .action(wrapper(async function (text, { js }) {
-    let migrations = new Migrations();
-    let migration = migrations.create({ text, sql: js !== true });
-    if (migration) {
-      console.log(migration.coloredLine());
-    }
-  }));
+  debug({ urls, url, env });
+  let migrations = null;
+  try {
 
-program
-  .command('check')
-  .description('Check migration status.')
-  .option('--url [url]', 'PostgreSQL URL.', 'postgresql://127.0.0.1/test')
-  .action(wrapper(async function ({ url }) {
-    let migrations = null;
-    try {
-      migrations = new Migrations({ url });
-      await migrations.prepare();
-      console.log(`${chalk.white(migrations.url)} connected.`);
-      for (let info of await migrations.check()) {
+    // Create migration objects for all urls.
+    migrations = urls.map(e => new Migrations({ url: e }));
+    debug({ migrations, foo: 1 });
+
+    // Prepare for all.
+    // TODO: We should be read only here, maybe add flag.
+    await Promise.all(migrations.map(e => e.prepare()));
+
+    // Print legend.
+    migrations.forEach((e, i) => {
+      console.log(`${labels[i]}. ${e.url}`);
+    });
+
+    const checks = await Promise.all(migrations.map(e => e.check()));
+    checks.forEach((e, i) => {
+      console.log(`${labels[i]}. ${migrations[i].url}`);
+      for (let info of e) {
         console.log(info.coloredLine());
       }
-    } finally {
-      migrations.disconnect();
-    }
-  }));
+      console.log();
+    });
 
-program
-  .command('migrate')
-  .description('Migrate database.')
-  .option('--url [url]', 'PostgreSQL URL.', 'postgresql://127.0.0.1/test')
-  .action(wrapper(async function ({ url }) {
-    let migrations = null;
-    try {
-      migrations = new Migrations({ url });
-      await migrations.prepare();
-      console.log(`${chalk.white(migrations.url)} connected.`);
-      for (let { status, stamp } of await migrations.check()) {
-        if (status === 'pending') {
-          let info = await migrations.migrate(stamp);
-          console.log(info.coloredLine());
-          if (info.status !== 'migrated') {
-            throw new Error(info.text);
-          }
+  } finally {
+    if (migrations) {
+      migrations.forEach(e => e.disconnect());
+    }
+  }
+}
+
+async function migrate({ url }) {
+  let migrations = null;
+  try {
+    migrations = new Migrations({ url });
+    await migrations.prepare();
+    console.log(`${chalk.white(migrations.url)} connected.`);
+    for (let { status, stamp } of await migrations.check()) {
+      if (status === 'pending') {
+        let info = await migrations.migrate(stamp);
+        console.log(info.coloredLine());
+        if (info.status !== 'migrated') {
+          throw new Error(info.text);
         }
       }
-    } finally {
-      migrations.disconnect();
     }
-  }));
-
-const userArgs = process.argv[2] === '--' ? process.argv.slice(3) : process.argv.slice(2);
-switch (userArgs[0]) {
-  case 'create':
-  case 'check':
-  case 'migrate':
-    program.parse(userArgs);
-    break;
-  default:
-    program.outputHelp();
+  } finally {
+    migrations.disconnect();
+  }
 }
+
+async function main() {
+
+  const program = yargs
+    .wrap(null)
+    .usage('$0 [command]')
+    .command('create', 'Create migration file.')
+    .command('check', 'Check migration status.')
+    .command('migrate', 'Migrate database(s).')
+    .demand(1, 'Command argument needs to be provided.');
+
+  const { argv: { _: [ command ] } } = program;
+
+  switch (command) {
+    case 'create':
+      program.reset()
+        .wrap(null)
+        .usage('$0 create [--js] --name="foo_bar"')
+        .describe('js', 'Generate js file instead of sql.')
+        .describe('name', 'Base name of the migration file.')
+        .example('$0 create --name create_users', 'Creates "create_users" sql based migration.')
+        .example('$0 create --js --name create_users', 'Creates "create_users" js based migration.')
+        .help('help');
+      await create(program.argv);
+      break;
+
+    case 'check':
+      program.reset()
+        .wrap(null)
+        .usage('$0 check [--env ENV=development] [--url URL]')
+        .default({ env: 'development' })
+        .describe('env', 'Use environment defined in .dbmigrations.json file.')
+        .describe('url', 'Use provided URL (password is searched in ~/.pgpass file).')
+        .example('$0 check --env development', 'Checks migration status for all databases defined in .dbmigrations.json as development environment.')
+        .help('help');
+      await check(program.argv);
+      break;
+
+    case 'migrate':
+      program.reset()
+        .wrap(null)
+        .usage('$0 migrate [--env ENV=development] [--url URL]')
+        .default({ env: 'development' })
+        .describe('env', 'Use environment defined in .dbmigrations.json file.')
+        .describe('url', 'Use provided URL (password is searched in ~/.pgpass file).')
+        .example('$0 migrate --env development', 'Migrates all databases defined in .dbmigrations.json as development environment.')
+        .help('help');
+      await migrate(program.argv);
+      break;
+
+    default:
+      program.showHelp();
+  }
+}
+
+main()
+  .then(() => { console.log('done.'); })
+  .catch(err => { console.error(chalk.red(err.stack ? err.stack : err)); });

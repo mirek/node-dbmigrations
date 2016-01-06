@@ -58,7 +58,7 @@ export class Migrations {
    * @param {String} root = `${__dirname}/../migrations` Migration definitions root directory.
    * @return {Migrations}
    */
-  constructor({ url, root = `${__dirname}/../migrations`, logger = console.log } = {}) {
+  constructor({ url, root = `./migrations`, logger = console.log } = {}) {
     this.logger = logger;
     if (url) {
       this.reconnect(url);
@@ -146,25 +146,24 @@ export class Migrations {
 
   /**
    * Create new local migration definition file.
-   * @param {Object} options
-   * @param {String} options.text Migration name, ie. 'foo_bar'.
-   * @param {Boolean} options.sql If true, creates sql migration, otherwise js.
+   * @param {string} .text Migration name, ie. 'foo_bar'.
+   * @param {boolean} .sql If true, creates sql migration, otherwise js.
    * @return {MigrationInfo}
    */
-  create({ stamp = `${Math.floor(Date.now() / 1000)}`, text, sql = true }) {
-    let base = text ? `${stamp}_${text}` : stamp;
+  create({ stamp = `${Math.floor(Date.now() / 1000)}`, name, sql = true }) {
+    let base = name ? `${stamp}_${name}` : stamp;
     let fname = null;
     let content = null;
     if (sql) {
       fname = `${base}.sql`;
-      content = template('sql.tmpl');
+      content = template('sql', { stamp });
     } else {
       fname = `${base}.js`;
-      content = template('js.tmpl');
+      content = template('js', { stamp });
     }
     let path = `${this.root}/${fname}`;
     fs.writeFileSync(path, content);
-    return new MigrationInfo({ status: 'created', stamp, text, path });
+    return new MigrationInfo({ status: 'created', stamp, text: name, path });
   }
 
   /**
