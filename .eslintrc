@@ -70,7 +70,7 @@ rules:
   no-octal-escape: 2 # Rule to flag octal escape sequences in string literals. (default 0)
   no-param-reassign: 1 # Disallow reassignment of function parameters. (default 0)
   no-path-concat: 2 # Disallow string concatenation when using __dirname and __filename (default 0)
-  no-process-env: 2 # Disallow the use of process.env() (default 0)
+  no-process-env: 0 # Disallow the use of process.env() (default 0)
   no-process-exit: 2 # Disallow the use of process.exit() (default 0)
   no-proto: 2 # Rule to flag usage of __proto__ property (default 0)
   no-restricted-modules: [2, winston, moment-timezone, colors] # Restrict usage of specified node modules. (default 0)

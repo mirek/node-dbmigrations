@@ -1,6 +1,9 @@
 
 /* eslint-disable no-console */
 
+// import Debug from 'debug';
+// const debug = new Debug('dbmigrations');
+
 import fs from 'fs';
 import path from 'path';
 import Sequelize from 'sequelize';
@@ -57,14 +60,11 @@ export default class Migrations {
    * If `migrations` table doesn't exist, create one.
    */
   async maybeInit() {
-    let queryInterface = this.db.getQueryInterface();
-    let table = null;
-    try {
-      table = await queryInterface.describeTable('migrations');
-    } catch (err) {
-      table = null;
-    }
-    if (table) {
+    const [ { exists } ] = await this.db.query(`
+      select (to_regclass(:name) is not null) "exists"
+    `, { replacements: { name: 'public.migrations' } });
+    if (!exists) {
+      const queryInterface = this.db.getQueryInterface();
       await queryInterface.createTable('migrations', {
         'created_at': { type: Sequelize.DATE, allowNull: false, default: Sequelize.fn('NOW') },
         'stamp': { type: Sequelize.TEXT, allowNull: false }
@@ -121,9 +121,9 @@ export default class Migrations {
       fname = `${base}.js`;
       content = template('js', { stamp });
     }
-    let path = `${this.root}/${fname}`;
-    fs.writeFileSync(path, content);
-    return new MigrationInfo({ status: 'created', stamp, text: name, path });
+    let path_ = `${this.root}/${fname}`;
+    fs.writeFileSync(path_, content);
+    return new MigrationInfo({ status: 'created', stamp, text: name, path: path_ });
   }
 
   /**

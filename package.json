@@ -33,7 +33,7 @@
     "pg": "^4.4.3",
     "pg-hstore": "^2.3.2",
     "pgpass": "0.0.3",
-    "sequelize": "^3.16.0",
+    "sequelize": "^3.17.1",
     "sprintf": "^0.1.5",
     "yargs": "^3.31.0"
   },

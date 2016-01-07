@@ -1,7 +1,9 @@
 /* eslint-env node */
 /* eslint-disable no-console, max-len */
 
-import Debug from 'debug';
+// import Debug from 'debug';
+// const debug = new Debug('dbmigrations');
+
 import yargs from 'yargs';
 import Migrations from './migrations';
 import chalk from 'chalk';
@@ -9,7 +11,6 @@ import _ from 'lodash';
 // import pkg from '../package.json';
 import * as helpers from './helpers';
 
-const debug = new Debug('dbmigrations');
 const dotfile = helpers.dotfile();
 const labels = '123456789abcdefghijklmnopqrstuvwxyz';
 
@@ -41,14 +42,11 @@ async function create({ js, sql, name }, { log }) {
 
 async function check({ env, url }, { log }) {
   const urls = urlsWithUrlAndEnv(url, env);
-
-  debug({ urls, url, env });
   let migrations = null;
   try {
 
     // Create migration objects for all urls.
     migrations = urls.map(e => new Migrations({ url: e }));
-    debug({ migrations, foo: 1 });
 
     // Prepare for all.
     // TODO: We should be read only here, maybe add flag.
@@ -95,7 +93,7 @@ async function migrate({ url }, { log }) {
   }
 }
 
-export default async function (originalArgs = process.argv, { log = console.log }) {
+export default async function (originalArgs = process.argv, { log = console.log } = {}) {
 
   const args = yargs(originalArgs)
     .wrap(null)
