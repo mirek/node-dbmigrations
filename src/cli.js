@@ -31,15 +31,15 @@ function urlsWithUrlAndEnv(url, env) {
   return r;
 }
 
-async function create({ js, sql, name }) {
+async function create({ js, sql, name }, { log }) {
   let migrations = new Migrations();
   let migration = migrations.create({ name, sql: js !== true || sql === true });
   if (migration) {
-    console.log(migration.coloredLine());
+    log(migration.coloredLine());
   }
 }
 
-async function check({ env, url }) {
+async function check({ env, url }, { log }) {
   const urls = urlsWithUrlAndEnv(url, env);
 
   debug({ urls, url, env });
@@ -56,16 +56,16 @@ async function check({ env, url }) {
 
     // Print legend.
     migrations.forEach((e, i) => {
-      console.log(`${labels[i]}. ${e.url}`);
+      log(`${labels[i]}. ${e.url}`);
     });
 
     const checks = await Promise.all(migrations.map(e => e.check()));
     checks.forEach((e, i) => {
-      console.log(`${labels[i]}. ${migrations[i].url}`);
+      log(`${labels[i]}. ${migrations[i].url}`);
       for (let info of e) {
-        console.log(info.coloredLine());
+        log(info.coloredLine());
       }
-      console.log();
+      log();
     });
 
   } finally {
@@ -75,16 +75,16 @@ async function check({ env, url }) {
   }
 }
 
-async function migrate({ url }) {
+async function migrate({ url }, { log }) {
   let migrations = null;
   try {
     migrations = new Migrations({ url });
     await migrations.prepare();
-    console.log(`${chalk.white(migrations.url)} connected.`);
+    log(`${chalk.white(migrations.url)} connected.`);
     for (let { status, stamp } of await migrations.check()) {
       if (status === 'pending') {
         let info = await migrations.migrate(stamp);
-        console.log(info.coloredLine());
+        log(info.coloredLine());
         if (info.status !== 'migrated') {
           throw new Error(info.text);
         }
@@ -95,7 +95,7 @@ async function migrate({ url }) {
   }
 }
 
-export default async function (originalArgs = process.argv) {
+export default async function (originalArgs = process.argv, { log = console.log }) {
 
   const args = yargs(originalArgs)
     .wrap(null)
@@ -117,7 +117,7 @@ export default async function (originalArgs = process.argv) {
         .example('$0 create --name create_users', 'Creates "create_users" sql based migration.')
         .example('$0 create --js --name create_users', 'Creates "create_users" js based migration.')
         .help('help');
-      await create(args.argv);
+      await create(args.argv, { log });
       break;
 
     case 'check':
@@ -129,7 +129,7 @@ export default async function (originalArgs = process.argv) {
         .describe('url', 'Use provided URL (password is searched in ~/.pgpass file).')
         .example('$0 check --env development', 'Checks migration status for all databases defined in .dbmigrations.json as development environment.')
         .help('help');
-      await check(args.argv);
+      await check(args.argv, { log });
       break;
 
     case 'migrate':
@@ -141,7 +141,7 @@ export default async function (originalArgs = process.argv) {
         .describe('url', 'Use provided URL (password is searched in ~/.pgpass file).')
         .example('$0 migrate --env development', 'Migrates all databases defined in .dbmigrations.json as development environment.')
         .help('help');
-      await migrate(args.argv);
+      await migrate(args.argv, { log });
       break;
 
     default:
