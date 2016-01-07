@@ -3,7 +3,7 @@
 
 import Debug from 'debug';
 import yargs from 'yargs';
-import { Migrations } from './index';
+import Migrations from './migrations';
 import chalk from 'chalk';
 import _ from 'lodash';
 // import pkg from '../package.json';
@@ -95,9 +95,9 @@ async function migrate({ url }) {
   }
 }
 
-async function main() {
+export default async function (originalArgs = process.argv) {
 
-  const program = yargs
+  const args = yargs(originalArgs)
     .wrap(null)
     .usage('$0 [command]')
     .command('create', 'Create migration file.')
@@ -105,11 +105,11 @@ async function main() {
     .command('migrate', 'Migrate database(s).')
     .demand(1, 'Command argument needs to be provided.');
 
-  const { argv: { _: [ command ] } } = program;
+  const { argv: { _: [ command ] } } = args;
 
   switch (command) {
     case 'create':
-      program.reset()
+      args.reset()
         .wrap(null)
         .usage('$0 create [--js] --name="foo_bar"')
         .describe('js', 'Generate js file instead of sql.')
@@ -117,11 +117,11 @@ async function main() {
         .example('$0 create --name create_users', 'Creates "create_users" sql based migration.')
         .example('$0 create --js --name create_users', 'Creates "create_users" js based migration.')
         .help('help');
-      await create(program.argv);
+      await create(args.argv);
       break;
 
     case 'check':
-      program.reset()
+      args.reset()
         .wrap(null)
         .usage('$0 check [--env ENV=development] [--url URL]')
         .default({ env: 'development' })
@@ -129,11 +129,11 @@ async function main() {
         .describe('url', 'Use provided URL (password is searched in ~/.pgpass file).')
         .example('$0 check --env development', 'Checks migration status for all databases defined in .dbmigrations.json as development environment.')
         .help('help');
-      await check(program.argv);
+      await check(args.argv);
       break;
 
     case 'migrate':
-      program.reset()
+      args.reset()
         .wrap(null)
         .usage('$0 migrate [--env ENV=development] [--url URL]')
         .default({ env: 'development' })
@@ -141,14 +141,10 @@ async function main() {
         .describe('url', 'Use provided URL (password is searched in ~/.pgpass file).')
         .example('$0 migrate --env development', 'Migrates all databases defined in .dbmigrations.json as development environment.')
         .help('help');
-      await migrate(program.argv);
+      await migrate(args.argv);
       break;
 
     default:
-      program.showHelp();
+      args.showHelp();
   }
 }
-
-main()
-  .then(() => { console.log('done.'); })
-  .catch(err => { console.error(chalk.red(err.stack ? err.stack : err)); });
