@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 
 import fs from 'fs';
+import path from 'path';
 import Sequelize from 'sequelize';
 import _ from 'lodash';
 import assert from 'assert';
@@ -91,14 +92,14 @@ export default class Migrations {
    * @param {String} root
    */
   reload(root) {
-    this.root = root;
+    this.root = path.resolve(root);
     this.defs = fs.readdirSync(this.root).filter((fname) => fname.match(/^\d{10}\_/)).sort().map((fname) => {
       let [, stamp, text, ext] = fname.match(/^(\d{10})_([^\.]+)\.(sql|js)$/);
-      let path = `${this.root}/${fname}`;
+      let fpath = path.resolve(this.root, fname);
       return {
         stamp, text, ext,
-        sql: ext === 'sql' ? fs.readFileSync(path, 'utf8') : null,
-        js: ext === 'js' ? require(path) : null
+        sql: ext === 'sql' ? fs.readFileSync(fpath, 'utf8') : null,
+        js: ext === 'js' ? require(fpath) : null
       };
     });
   }
