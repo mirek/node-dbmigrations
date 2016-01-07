@@ -1,2 +1,3 @@
 /work
-/dbmigrations-*.tgz
+/*.tgz
+/spec/index/migrations

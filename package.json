@@ -11,7 +11,7 @@
     "prepublish": "rm -rf lib && babel src -d lib",
     "test": "npm run prepublish && mocha --check-leaks --reporter spec --require babel-polyfill --compilers js:babel-register spec/",
     "babel": "babel",
-    "show-pack": "npm pack && tar -tf dbmigrations-*.tgz | sort && rm dbmigrations-*.tgz",
+    "pack-ls": "npm pack && tar -tf dbmigrations-*.tgz | sort && rm dbmigrations-*.tgz",
     "lint": "eslint src/*"
   },
   "keywords": [

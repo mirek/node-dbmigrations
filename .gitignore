@@ -3,3 +3,4 @@
 /config/local.*
 /work
 /spec/index/migrations
+/*.tgz
