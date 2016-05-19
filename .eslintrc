@@ -3,12 +3,9 @@ extends: 'eslint:recommended'
 parser:
   babel-eslint
 env:
-  browser: true
   node: true
   mocha: true
   es6: true
-ecmaFeatures:
-  jsx: true
 rules:
   accessor-pairs: 2 # Rule to flag wrapping non-iife in parens (default 0)
   block-scoped-var: 2 # Rule to check for "block scoped" variables by binding context (default 0)
@@ -43,11 +40,10 @@ rules:
   no-caller: 2 # Rule to flag use of arguments.callee and arguments.caller. (default 0)
   no-div-regex: 2 # Rule to check for ambiguous div operator in regexes (default 0)
   no-else-return: 2 # Rule to flag `else` after a `return` in `if` (default 0)
-  no-empty-label: 2 # Rule to flag when label is not used for a loop or switch (default 0)
   no-eval: 2 # Rule to flag use of eval() statement (default 0)
   no-extend-native: 2 # Rule to flag adding properties to native object's prototypes. (default 0)
   no-extra-bind: 2 # Rule to flag unnecessary bind calls (default 0)
-  no-extra-parens: 0 # Disallow parenthesising higher precedence subexpressions. (default 0)
+  no-extra-parens: 2 # Disallow parenthesising higher precedence subexpressions. (default 0)
   no-floating-decimal: 2 # Rule to flag use of a leading/trailing decimal point in a numeric literal (default 0)
   no-implied-eval: 2 # Rule to flag use of implied eval via setTimeout and setInterval (default 0)
   no-iterator: 2 # Rule to flag usage of __iterator__ property (default 0)
@@ -61,7 +57,7 @@ rules:
   no-multi-str: 2 # Rule to flag when using multiline strings (default 0)
   no-multiple-empty-lines: 1 # Disallows multiple blank lines. (default [0,{"max":2}])
   no-native-reassign: 2 # Rule to flag when re-assigning native objects (default 0)
-  no-nested-ternary: 0 # Rule to flag nested ternary expressions (default 0)
+  no-nested-ternary: 1 # Rule to flag nested ternary expressions (default 0)
   no-new: 2 # Rule to flag statements with function invocation preceded by (default 0)
   no-new-func: 2 # Rule to flag when using new Function (default 0)
   no-new-object: 1 # A rule to disallow calls to the Object constructor (default 0)
@@ -70,7 +66,7 @@ rules:
   no-octal-escape: 2 # Rule to flag octal escape sequences in string literals. (default 0)
   no-param-reassign: 1 # Disallow reassignment of function parameters. (default 0)
   no-path-concat: 2 # Disallow string concatenation when using __dirname and __filename (default 0)
-  no-process-env: 0 # Disallow the use of process.env() (default 0)
+  no-process-env: 2 # Disallow the use of process.env() (default 0)
   no-process-exit: 2 # Disallow the use of process.exit() (default 0)
   no-proto: 2 # Rule to flag usage of __proto__ property (default 0)
   no-restricted-modules: [2, winston, moment-timezone, colors] # Restrict usage of specified node modules. (default 0)
@@ -78,7 +74,7 @@ rules:
   no-script-url: 2 # Rule to flag when using javascript: urls (default 0)
   no-self-compare: 2 # Rule to flag comparison where left part is the same as the right (default 0)
   no-sequences: 2 # Rule to flag use of comma operator (default 0)
-  no-shadow: [2, { allow: [ "err" ] }] # Rule to flag on declaring variables already declared in the outer scope (default 0)
+  no-shadow: 2 # Rule to flag on declaring variables already declared in the outer scope (default 0)
   no-shadow-restricted-names: 2 # Disallow shadowing of NaN, undefined, and Infinity (ES5 section 15.1.1) (default 0)
   no-spaced-func: 1 # Rule to check that spaced function application (default 0)
   no-this-before-super: 1 # A rule to disallow using `this`/`super` before `super()`. (default 0)
@@ -98,11 +94,9 @@ rules:
   radix: 2 # Rule to flag use of parseInt without a radix argument (default 0)
   semi: [1, always] # Rule to flag missing semicolons. (default 0)
   semi-spacing: [1, {before: false, after: true}] # Validates spacing before and after semicolon (default [0,{"before":false,"after":true}])
-  space-after-keywords: [1, always] # Rule to enforce the number of spaces after certain keywords (default [0,"always"])
   space-before-blocks: [1, always] # A rule to ensure whitespace before blocks. (default [0,"always"])
   space-in-parens: [1, never] # Disallows or enforces spaces inside of parentheses. (default [0,"never"])
   space-infix-ops: 1 # Require spaces around infix operators (default 0)
-  space-return-throw-case: 1 # Require spaces following return, throw, and case (default 0)
   space-unary-ops: 1 # This rule shoud require or disallow spaces before or after unary operations. (default [0,{"words":true,"nonwords":false}])
   spaced-comment: [1, always] # Source code for spaced-comments rule (default 0)
   strict: [2, never] # Rule to control usage of strict mode directives. (default 0)
