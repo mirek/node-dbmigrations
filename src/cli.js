@@ -1,14 +1,7 @@
-/* eslint-env node */
-/* eslint-disable no-console, max-len */
-
-// import Debug from 'debug';
-// const debug = new Debug('dbmigrations');
-
 import yargs from 'yargs';
-import Migrations from './migrations';
 import chalk from 'chalk';
 import _ from 'lodash';
-// import pkg from '../package.json';
+import Migrations from './migrations';
 import * as helpers from './helpers';
 
 const dotfile = helpers.dotfile();
@@ -21,7 +14,7 @@ const labels = '123456789abcdefghijklmnopqrstuvwxyz';
  * @return {array[string]} List of urls
  */
 function urlsWithUrlAndEnv(url, env) {
-  let r = [];
+  const r = [];
   if (url) {
     r.push(url);
   }
@@ -33,8 +26,8 @@ function urlsWithUrlAndEnv(url, env) {
 }
 
 async function create({ js, sql, name }, { log }) {
-  let migrations = new Migrations();
-  let migration = migrations.create({ name, sql: js !== true || sql === true });
+  const migrations = new Migrations();
+  const migration = migrations.create({ name, sql: js !== true || sql === true });
   if (migration) {
     log(migration.coloredLine());
   }
@@ -60,12 +53,11 @@ async function check({ env, url }, { log }) {
     const checks = await Promise.all(migrations.map(e => e.check()));
     checks.forEach((e, i) => {
       log(`${labels[i]}. ${migrations[i].url}`);
-      for (let info of e) {
+      for (const info of e) {
         log(info.coloredLine());
       }
       log();
     });
-
   } finally {
     if (migrations) {
       migrations.forEach(e => e.disconnect());
@@ -79,9 +71,9 @@ async function migrate({ url }, { log }) {
     migrations = new Migrations({ url });
     await migrations.prepare();
     log(`${chalk.white(migrations.url)} connected.`);
-    for (let { status, stamp } of await migrations.check()) {
+    for (const { status, stamp } of await migrations.check()) {
       if (status === 'pending') {
-        let info = await migrations.migrate(stamp);
+        const info = await migrations.migrate(stamp);
         log(info.coloredLine());
         if (info.status !== 'migrated') {
           throw new Error(info.text);

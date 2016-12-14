@@ -1,10 +1,4 @@
 
-import MigrationInfo from './migration-info';
-import Migrations from './migrations';
-import cli from './cli';
-
-export {
-  MigrationInfo,
-  Migrations,
-  cli
-};
+export MigrationInfo from './migration-info';
+export Migrations from './migrations';
+export cli from './cli';

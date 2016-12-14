@@ -25,7 +25,7 @@ export default class MigrationInfo {
    * @return {string}
    */
   coloredLine() {
-    let line = _.compact([
+    const line = _.compact([
       new Date().toISOString(),
       this.stamp,
       sprintf('%8s', this.status),
@@ -33,7 +33,7 @@ export default class MigrationInfo {
       this.migratedAt ? `(migrated ${this.migratedAt})` : null,
       this.path ? `(${this.path})` : null
     ]).join(' ');
-    let color = MigrationInfo.statusColors[this.status];
+    const color = MigrationInfo.statusColors[this.status];
     if (!color) {
       throw new TypeError(
         `Unknown status ${this.status}, expected one of ${_.keys(MigrationInfo.statusColors).join(', ')}.`
@@ -42,5 +42,3 @@ export default class MigrationInfo {
     return chalk[color](line);
   }
 }
-
-module.exports = MigrationInfo;

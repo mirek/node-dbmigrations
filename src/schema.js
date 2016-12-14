@@ -7,7 +7,7 @@ const ajv = new Ajv();
 const root = `${__dirname}/../schemas`;
 
 // Load schema definitions.
-for (let name of fs.readdirSync(root)) {
+for (const name of fs.readdirSync(root)) {
   ajv.addSchema(JSON.parse(fs.readFileSync(`${root}/${name}`, 'utf8')), path.basename(name, '.schema.json'));
 }
 
@@ -18,7 +18,7 @@ for (let name of fs.readdirSync(root)) {
  * @return {any} Provided json.
  * @throws Error if provided json doesn't conform to the schema.
  */
-export function assert(name, json) {
+export default function assert(name, json) {
   if (!ajv.validate(name, json)) {
     throw new Error(ajv.errorsText());
   }

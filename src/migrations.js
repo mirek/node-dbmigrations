@@ -1,9 +1,3 @@
-
-/* eslint-disable no-console */
-
-// import Debug from 'debug';
-// const debug = new Debug('dbmigrations');
-
 import fs from 'fs';
 import path from 'path';
 import Sequelize from 'sequelize';
@@ -21,7 +15,7 @@ export default class Migrations {
    * @param {String} root = `${__dirname}/../migrations` Migration definitions root directory.
    * @return {Migrations}
    */
-  constructor({ url, root = `./migrations`, logger = console.log } = {}) {
+  constructor({ url, root = './migrations', logger = console.log } = {}) {
     this.logger = logger;
     if (url) {
       this.reconnect(url);
@@ -66,8 +60,8 @@ export default class Migrations {
     if (!exists) {
       const queryInterface = this.db.getQueryInterface();
       await queryInterface.createTable('migrations', {
-        'created_at': { type: Sequelize.DATE, allowNull: false, default: Sequelize.fn('NOW') },
-        'stamp': { type: Sequelize.TEXT, allowNull: false }
+        created_at: { type: Sequelize.DATE, allowNull: false, default: Sequelize.fn('NOW') },
+        stamp: { type: Sequelize.TEXT, allowNull: false }
       });
     }
   }
@@ -93,13 +87,15 @@ export default class Migrations {
    */
   reload(root) {
     this.root = path.resolve(root);
-    this.defs = fs.readdirSync(this.root).filter((fname) => fname.match(/^\d{10}\_/)).sort().map((fname) => {
-      let [, stamp, text, ext] = fname.match(/^(\d{10})_([^\.]+)\.(sql|js)$/);
-      let fpath = path.resolve(this.root, fname);
+    this.defs = fs.readdirSync(this.root).filter(fname => fname.match(/^\d{10}_/)).sort().map((fname) => {
+      const [ , stamp, text, ext ] = fname.match(/^(\d{10})_([^.]+)\.(sql|js)$/);
+      const fpath = path.resolve(this.root, fname);
       return {
-        stamp, text, ext,
+        stamp,
+        text,
+        ext,
         sql: ext === 'sql' ? fs.readFileSync(fpath, 'utf8') : null,
-        js: ext === 'js' ? require(fpath) : null
+        js: ext === 'js' ? require(fpath) : null // eslint-disable-line import/no-dynamic-require, global-require
       };
     });
   }
@@ -111,7 +107,7 @@ export default class Migrations {
    * @return {MigrationInfo}
    */
   create({ stamp = `${Math.floor(Date.now() / 1000)}`, name, sql = true }) {
-    let base = name ? `${stamp}_${name}` : stamp;
+    const base = name ? `${stamp}_${name}` : stamp;
     let fname = null;
     let content = null;
     if (sql) {
@@ -121,9 +117,9 @@ export default class Migrations {
       fname = `${base}.js`;
       content = template('js', { stamp });
     }
-    let path_ = `${this.root}/${fname}`;
-    fs.writeFileSync(path_, content);
-    return new MigrationInfo({ status: 'created', stamp, text: name, path: path_ });
+    const effectivePath = `${this.root}/${fname}`;
+    fs.writeFileSync(effectivePath, content);
+    return new MigrationInfo({ status: 'created', stamp, text: name, path: effectivePath });
   }
 
   /**
@@ -153,7 +149,7 @@ export default class Migrations {
    * @return {async Date} Migration created at timestamp.
    */
   async mark(stamp) {
-    let [ { created_at: createdAt } ] = await this.db.query(
+    const [ { created_at: createdAt } ] = await this.db.query(
       'INSERT INTO migrations(stamp, created_at) VALUES(:stamp, NOW()) RETURNING created_at;', {
         replacements: { stamp },
         type: Sequelize.QueryTypes.INSERT
@@ -171,14 +167,14 @@ export default class Migrations {
     const remotes = await this.dbDefs();
     let i = 0;
     let j = 0;
-    let r = [];
+    const r = [];
 
-    const push = function (options) {
+    const push = (options) => {
       r.push(new MigrationInfo(options));
     };
 
     const pushMigrated = (local, remote) => {
-      push({ status: 'migrated', stamp: local.stamp, text: local.text, migratedAt: remote['created_at'] });
+      push({ status: 'migrated', stamp: local.stamp, text: local.text, migratedAt: remote.created_at });
     };
 
     const pushPending = (local) => {
@@ -186,7 +182,7 @@ export default class Migrations {
     };
 
     const pushUnknown = (remote) => {
-      push({ status: 'unknown', stamp: remote.stamp, migratedAt: remote['created_at'] });
+      push({ status: 'unknown', stamp: remote.stamp, migratedAt: remote.created_at });
     };
 
     while (i < locals.length && j < remotes.length) {
@@ -218,7 +214,7 @@ export default class Migrations {
   async migrate(stamp) {
 
     // Make sure we've got local definition.
-    let def = _.find(this.defs, { stamp });
+    const def = _.find(this.defs, { stamp });
     assert(def, `Local definition with stamp ${stamp} not found.`);
 
     // Make sure it's not migrated.
@@ -235,14 +231,11 @@ export default class Migrations {
         break;
 
       default:
-        throw new TypeError(`Unknown migration type, expected js or sql definitions.`);
+        throw new TypeError('Unknown migration type, expected js or sql definitions.');
     }
 
     migratedAt = await this.mark(stamp);
 
     return new MigrationInfo({ status: 'migrated', stamp, text: def.text, migratedAt });
   }
-
 }
-
-module.exports = Migrations;

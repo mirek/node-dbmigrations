@@ -7,7 +7,7 @@ import * as schema from './schema';
 export function dotfile(root = '.', name = '.dbmigrations.json') {
   let p = root;
   while (p) {
-    let r = path.resolve(p, name);
+    const r = path.resolve(p, name);
     if (fs.existsSync(r)) {
       return schema.assert('dbmigrations', JSON.parse(fs.readFileSync(r, { encoding: 'utf8' })));
     }
