@@ -1,6 +1,6 @@
 {
   "name": "dbmigrations",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Database migrations.",
   "main": "lib/index.js",
   "repository": "https://github.com/mirek/node-dbmigrations.git",
