@@ -1,8 +1,9 @@
-import yargs from 'yargs';
-import chalk from 'chalk';
-import _ from 'lodash';
-import Migrations from './migrations';
-import * as helpers from './helpers';
+
+const yargs = require('yargs');
+const chalk = require('chalk');
+const _ = require('lodash');
+const Migrations = require('./migrations');
+const helpers = require('./helpers');
 
 const dotfile = helpers.dotfile();
 const labels = '123456789abcdefghijklmnopqrstuvwxyz';
@@ -85,7 +86,7 @@ async function migrate({ url }, { log }) {
   }
 }
 
-export default async function (originalArgs = process.argv, { log = console.log } = {}) {
+async function cli(originalArgs = process.argv, { log = console.log } = {}) {
 
   const args = yargs(originalArgs)
     .wrap(null)
@@ -138,3 +139,5 @@ export default async function (originalArgs = process.argv, { log = console.log 
       args.showHelp();
   }
 }
+
+module.exports = cli;

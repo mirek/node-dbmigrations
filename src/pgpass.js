@@ -1,10 +1,9 @@
-/* eslint-disable no-process-env */
 
-import pgpass from 'pgpass';
-import url from 'url';
+const pgpass = require('pgpass');
+const url = require('url');
 
-// Maybe decorate url with password from `~/.pgpass`.
-export default async function (a) {
+// Returns maybe decorated `a` url with password from `~/.pgpass`.
+async function maybePgpassDecorated(a) {
   return new Promise((resolve, reject) => {
     try {
       const parsed = url.parse(a);
@@ -33,3 +32,5 @@ export default async function (a) {
     }
   });
 }
+
+module.exports = maybePgpassDecorated;

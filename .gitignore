@@ -1,6 +1,6 @@
-/lib
 /node_modules
 /config/local.*
 /work
-/spec/index/migrations
+/test/index/migrations
 /*.tgz
+/package-lock.json

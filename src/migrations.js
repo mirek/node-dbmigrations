@@ -1,13 +1,14 @@
-import fs from 'fs';
-import path from 'path';
-import Sequelize from 'sequelize';
-import _ from 'lodash';
-import assert from 'assert';
-import pgpass from './pgpass';
-import { template } from './helpers';
-import MigrationInfo from './migration-info';
 
-export default class Migrations {
+const fs = require('fs');
+const path = require('path');
+const Sequelize = require('sequelize');
+const _ = require('lodash');
+const assert = require('assert');
+const pgpass = require('./pgpass');
+const { template } = require('./helpers');
+const MigrationInfo = require('./migration-info');
+
+class Migrations {
 
   /**
    * Create new migrations instance.
@@ -239,3 +240,5 @@ export default class Migrations {
     return new MigrationInfo({ status: 'migrated', stamp, text: def.text, migratedAt });
   }
 }
+
+module.exports = Migrations;

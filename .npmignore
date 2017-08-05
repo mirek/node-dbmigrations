@@ -1,3 +1,3 @@
 /work
 /*.tgz
-/spec/index/migrations
+/test/index/migrations

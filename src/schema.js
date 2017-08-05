@@ -1,7 +1,7 @@
 
-import fs from 'fs';
-import path from 'path';
-import Ajv from 'ajv';
+const fs = require('fs');
+const path = require('path');
+const Ajv = require('ajv');
 
 const ajv = new Ajv();
 const root = `${__dirname}/../schemas`;
@@ -18,9 +18,11 @@ for (const name of fs.readdirSync(root)) {
  * @return {any} Provided json.
  * @throws Error if provided json doesn't conform to the schema.
  */
-export default function assert(name, json) {
+function assert(name, json) {
   if (!ajv.validate(name, json)) {
     throw new Error(ajv.errorsText());
   }
   return json;
 }
+
+module.exports = assert;

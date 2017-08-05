@@ -1,10 +1,10 @@
 
-import path from 'path';
-import fs from 'fs';
-import ejs from 'ejs';
-import * as schema from './schema';
+const path = require('path');
+const fs = require('fs');
+const ejs = require('ejs');
+const schema = require('./schema');
 
-export function dotfile(root = '.', name = '.dbmigrations.json') {
+function dotfile(root = '.', name = '.dbmigrations.json') {
   let p = root;
   while (p) {
     const r = path.resolve(p, name);
@@ -17,7 +17,12 @@ export function dotfile(root = '.', name = '.dbmigrations.json') {
   return null;
 }
 
-export function template(basename, locals, options) {
+function template(basename, locals, options) {
   const raw = fs.readFileSync(path.join(__dirname, '../templates', `${basename}.ejs`), { encoding: 'utf8' });
   return ejs.render(raw, locals, options);
 }
+
+module.exports = {
+  dotfile,
+  template
+};

@@ -1,20 +1,12 @@
 
-import _ from 'lodash';
-import sprintf from 'sprintf';
-import chalk from 'chalk';
+const _ = require('lodash');
+const sprintf = require('sprintf');
+const chalk = require('chalk');
 
 /**
  * Represents single migration.
  */
-export default class MigrationInfo {
-
-  static statusColors = {
-    created: 'green',
-    migrated: 'green',
-    pending: 'yellow',
-    unknown: 'red',
-    error: 'red'
-  };
+class MigrationInfo {
 
   constructor({ stamp, status, text = null, migratedAt = null, path = null } = {}) {
     _.assign(this, { stamp, status, text, migratedAt, path });
@@ -42,3 +34,13 @@ export default class MigrationInfo {
     return chalk[color](line);
   }
 }
+
+MigrationInfo.statusColors = {
+  created: 'green',
+  migrated: 'green',
+  pending: 'yellow',
+  unknown: 'red',
+  error: 'red'
+};
+
+module.exports = MigrationInfo;
