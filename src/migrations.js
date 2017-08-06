@@ -168,7 +168,7 @@ class Migrations {
     };
 
     const pushMigrated = (local, remote) => {
-      push({ status: 'migrated', stamp: local.stamp, text: local.text, migratedAt: remote.created_at });
+      push({ status: 'migrated', stamp: local.stamp, text: local.text, migratedAt: remote.createdAt });
     };
 
     const pushPending = (local) => {
@@ -176,7 +176,7 @@ class Migrations {
     };
 
     const pushUnknown = (remote) => {
-      push({ status: 'unknown', stamp: remote.stamp, migratedAt: remote.created_at });
+      push({ status: 'unknown', stamp: remote.stamp, migratedAt: remote.createdAt });
     };
 
     while (i < locals.length && j < remotes.length) {
