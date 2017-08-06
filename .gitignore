@@ -4,3 +4,4 @@
 /test/index/migrations
 /*.tgz
 /package-lock.json
+/migrations

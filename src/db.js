@@ -1,3 +1,4 @@
+const url = require('url');
 const pg = require('pg');
 const _ = require('lodash');
 
@@ -20,10 +21,24 @@ function demangle(args) {
   return args;
 }
 
+// TODO: Double check this parsing.
+function parse(url_) {
+  const params = url.parse(url_);
+  const auth = params.auth ? params.auth.split(':') : null;
+  return {
+    user: auth ? auth[0] : null,
+    password: auth ? auth[1] : null,
+    host: params.hostname,
+    port: params.port,
+    database: params.pathname.split('/')[1]
+    // ssl: true FIXME: read from query param
+  };
+}
+
 class Db {
 
   constructor(url) {
-    this.pool = new pg.Pool(url);
+    this.pool = new pg.Pool(parse(url));
   }
 
   async query(...args) {

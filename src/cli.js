@@ -19,7 +19,7 @@ function urlsWithUrlAndEnv(url, env) {
   if (url) {
     r.push(url);
   }
-  if (env) {
+  if (env && dotfile) {
     const envUrls = _.get(dotfile, [ 'envs', env ]);
     r.push(...envUrls);
   }

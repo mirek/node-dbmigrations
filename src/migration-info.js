@@ -22,7 +22,7 @@ class MigrationInfo {
       this.stamp,
       sprintf('%8s', this.status),
       this.text,
-      this.migratedAt ? `(migrated ${this.migratedAt})` : null,
+      this.migratedAt ? `(migrated ${this.migratedAt.toISOString()})` : null,
       this.path ? `(${this.path})` : null
     ]).join(' ');
     const color = MigrationInfo.statusColors[this.status];
