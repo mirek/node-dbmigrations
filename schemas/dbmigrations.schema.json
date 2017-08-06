@@ -2,12 +2,6 @@
   "id": "dbmigrations",
   "type": "object",
   "properties": {
-    "engine": {
-      "type": "string",
-      "enum": [
-        "sequelize"
-      ]
-    },
     "envs": {
       "type": "object",
       "patternProperties": {

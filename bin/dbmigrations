@@ -2,4 +2,4 @@
 
 const cli = require('../src/cli');
 
-cli();
+cli().catch(err => console.error(err.stack ? err.stack : err));

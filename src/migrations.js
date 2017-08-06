@@ -1,9 +1,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const Sequelize = require('sequelize');
 const _ = require('lodash');
 const assert = require('assert');
+const Db = require('./db');
 const pgpass = require('./pgpass');
 const { template } = require('./helpers');
 const MigrationInfo = require('./migration-info');
@@ -46,8 +46,10 @@ class Migrations {
    * @return {async Boolean}
    */
   async prepare() {
-    this.db = new Sequelize(await pgpass(this.url), { logging: null });
-    await this.db.authenticate();
+    this.db = new Db(await pgpass(this.url));
+    if (await this.db.value("select '42';") !== '42') {
+      throw new Error(`Prepare failed, is postgres accessible?`);
+    }
     await this.maybeInit();
   }
 
@@ -55,15 +57,14 @@ class Migrations {
    * If `migrations` table doesn't exist, create one.
    */
   async maybeInit() {
-    const [ { exists } ] = await this.db.query(`
-      select (to_regclass(:name) is not null) "exists"
-    `, { replacements: { name: 'public.migrations' } });
+    const exists = await this.db.value(`select (to_regclass('public.migrations') is not null) "exists";`);
     if (!exists) {
-      const queryInterface = this.db.getQueryInterface();
-      await queryInterface.createTable('migrations', {
-        created_at: { type: Sequelize.DATE, allowNull: false, default: Sequelize.fn('NOW') },
-        stamp: { type: Sequelize.TEXT, allowNull: false }
-      });
+      await this.db.query(`
+        create table public.migrations (
+          created_at timestamptz not null default now(),
+          stamp text not null
+        );
+      `);
     }
   }
 
@@ -128,7 +129,7 @@ class Migrations {
    * @return {async Array}
    */
   async dbDefs() {
-    return this.db.query('SELECT * FROM migrations ORDER BY stamp ASC;', { type: Sequelize.QueryTypes.SELECT });
+    return this.db.rows('select * from public.migrations order by stamp asc;');
   }
 
   /**
@@ -137,11 +138,7 @@ class Migrations {
    * @return {async Date} Timestamp when migration has been performed, null otherwise.
    */
   async markedAt(stamp) {
-    const rows = await this.db.query('SELECT created_at FROM migrations WHERE stamp = :stamp;', {
-      replacements: { stamp },
-      type: Sequelize.QueryTypes.SELECT
-    });
-    return _.get(rows, '[0].created_at');
+    return await this.db.value('select created_at from public.migrations where stamp = $1 limit 1;', [stamp]);
   }
 
   /**
@@ -150,13 +147,9 @@ class Migrations {
    * @return {async Date} Migration created at timestamp.
    */
   async mark(stamp) {
-    const [ { created_at: createdAt } ] = await this.db.query(
-      'INSERT INTO migrations(stamp, created_at) VALUES(:stamp, NOW()) RETURNING created_at;', {
-        replacements: { stamp },
-        type: Sequelize.QueryTypes.INSERT
-      }
+    return await this.db.value(
+      'insert into public.migrations(stamp, created_at) values($1, now()) returning created_at;', [stamp]
     );
-    return createdAt;
   }
 
   /**

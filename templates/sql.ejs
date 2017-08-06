@@ -1,9 +1,5 @@
 begin;
 
--- Mark migration as completed.
---
--- NOTE: Optional, successful migrations are always marked but this explicit insert allows for copy-pasting migration
---       sql script and running it directly on the database.
-insert into migrations(stamp) values('<%= stamp %>');
+-- insert into migrations(created_at, stamp) values(now(), '<%= stamp %>');
 
 commit;

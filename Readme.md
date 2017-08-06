@@ -36,7 +36,6 @@ Use `dbmigrations --help` or `dbmigrations migrate --help` for sub-commands to g
 You can create `./.dbmigrations.json` configuration file. You can define environments (a list of urls):
 
     {
-      "engine": "sequelize",
       "envs": {
         "dev": [
           "postgres://localhost/test1",
@@ -56,7 +55,6 @@ To run migrations for all databases defined in environment use:
 ## Notes
 
 * currently only postgres is supported
-* currently only sequelize engine is supported in js migration files
 * currently there's no support for down-migrating
 
 If you're interested in any of those (or you think something else is missing) please create an issue or pull request.
