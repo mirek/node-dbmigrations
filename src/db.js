@@ -54,8 +54,8 @@ class Db {
     return null;
   }
 
-  close() {
-    this.pool.close();
+  async close() {
+    await this.pool.end();
   }
 
 }
