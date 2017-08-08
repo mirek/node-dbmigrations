@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const assert = require('assert');
-const Db = require('./db');
+const pg = require('pg-alt');
 const pgpass = require('./pgpass');
 const { template } = require('./helpers');
 const MigrationInfo = require('./migration-info');
@@ -46,7 +46,7 @@ class Migrations {
    * @return {async Boolean}
    */
   async prepare() {
-    this.db = new Db(await pgpass(this.url));
+    this.db = pg(await pgpass(this.url));
     if (await this.db.value("select '42';") !== '42') {
       throw new Error(`Prepare failed, is postgres accessible?`);
     }
@@ -138,7 +138,9 @@ class Migrations {
    * @return {async Date} Timestamp when migration has been performed, null otherwise.
    */
   async markedAt(stamp) {
-    return await this.db.value('select created_at from public.migrations where stamp = $1 limit 1;', [stamp]);
+    return await this.db.value(`
+      select created_at from public.migrations where stamp = ${stamp} limit 1;
+    `);
   }
 
   /**
@@ -147,9 +149,9 @@ class Migrations {
    * @return {async Date} Migration created at timestamp.
    */
   async mark(stamp) {
-    return await this.db.value(
-      'insert into public.migrations(stamp, created_at) values($1, now()) returning created_at;', [stamp]
-    );
+    return await this.db.value(`
+      insert into public.migrations(stamp, created_at) values(${stamp}, now()) returning created_at;
+    `);
   }
 
   /**
